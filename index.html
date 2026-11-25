@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWARDIGO RUNNER</title>
+<style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; background:#1a1a2e; font-family: Arial, sans-serif; text-align:center; color:white; }
+  h2 { margin:10px 0 5px; font-size:22px; }
+  #score { font-size:18px; font-weight:bold; margin:5px; }
+  #game { width:95%; max-width:400px; height:320px; background:linear-gradient(#87CEEB, #E0F7FA); position:relative; overflow:hidden; margin:10px auto; border:4px solid #222; border-radius:12px; }
+  #ground { position:absolute; bottom:0; width:100%; height:50px; background:#8B4513; border-top:4px solid #5D4037; }
+  #cloud1, #cloud2 { position:absolute; background:white; border-radius:20px; opacity:0.9; }
+  #cloud1 { width:60px; height:20px; top:30px; left:50px; }
+  #cloud2 { width:45px; height:16px; top:60px; left:250px; }
+  #player { position:absolute; bottom:50px; left:50px; width:36px; height:48px; background:#00C853; border:2px solid #000; border-radius:6px; transition:none; }
+  #hair { position:absolute; top:-2px; left:0; width:100%; height:14px; background:#1565C0; border-radius:6px 6px 0 0; }
+  #eye { position:absolute; top:20px; right:6px; width:7px; height:7px; background:#000; border-radius:50%; }
+  #mouth { position:absolute; bottom:8px; left:8px; width:18px; height:4px; background:#000; border-radius:3px; }
+  #enemy { position:absolute; bottom:50px; right:-40px; width:32px; height:32px; background:#FF5722; border:2px solid #000; border-radius:50%; }
+  #enemyEye { position:absolute; top:8px; left:8px; width:8px; height:8px; background:white; border-radius:50%; }
+  .btn { padding:16px 20px; font-size:20px; font-weight:bold; margin:5px; border-radius:12px; border:none; }
+  #jumpBtn { background:#00C853; color:white; width:140px; }
+  #startBtn { background:#FFC107; color:black; width:140px; }
+  #msg { font-size:14px; color:#FFEB3B; min-height:20px; }
+</style>
+</head>
+<body>
+<h2>🟢 SWARDIGO RUNNER 🔵</h2>
+<p id="score">Score: 0 | HP: 3 | Best: 0</p>
+<p id="msg">Pindutin START para maglaro!</p>
+
+<div id="game">
+  <div id="cloud1"></div>
+  <div id="cloud2"></div>
+  <div id="ground"></div>
+  <div id="player"><div id="hair"></div><div id="eye"></div><div id="mouth"></div></div>
+  <div id="enemy"><div id="enemyEye"></div></div>
+</div>
+
+<button id="jumpBtn" class="btn" onclick="jump()">⬆️ TALON</button>
+<button id="startBtn" class="btn" onclick="startGame()">▶️ START</button>
+<br>
+<p style="font-size:12px; opacity:0.7;">Gawa sa Spck Editor - By Swardigo</p>
+
+<script>
+let player = document.getElementById("player");
+let enemy = document.getElementById("enemy");
+let scoreText = document.getElementById("score");
+let msg = document.getElementById("msg");
+let y = 50, vy = 0, jumping = false;
+let enemyX = 400, score = 0, hp = 3, playing = false, speed = 5;
+let best = localStorage.getItem("swardigoBest") || 0;
+scoreText.innerText = "Score: 0 | HP: 3 | Best: " + best;
+
+function jump(){
+  if(!jumping){ vy = 15; jumping = true; }
+}
+document.addEventListener("keydown", function(e){
+  if(e.key === " " || e.key === "ArrowUp") jump();
+});
+document.getElementById("game").addEventListener("touchstart", jump);
+
+function startGame(){
+  score = 0; hp = 3; enemyX = 400; speed = 5; playing = true;
+  msg.innerText = "Takbo Swardigo! Iwasan mo bato!";
+  scoreText.innerText = "Score: " + score + " | HP: " + hp + " | Best: " + best;
+  gameLoop();
+}
+
+function gameLoop(){
+  if(!playing) return;
+  y += vy; vy -= 0.9;
+  if(y <= 50){ y = 50; vy = 0; jumping = false; }
+  player.style.bottom = y + "px";
+
+  enemyX -= speed;
+  if(enemyX < -40){ enemyX = 400; score++; speed += 0.2; }
+  enemy.style.right = (400 - enemyX) + "px";
+
+  if(enemyX > 40 && enemyX < 90 && y < 95){
+    hp--; enemyX = 400;
+    msg.innerText = "ARAY! Tinamaan ka! HP: " + hp;
+    if(hp <= 0){
+      if(score > best){ best = score; localStorage.setItem("swardigoBest", best); }
+      msg.innerText = "GAME OVER! Score: " + score;
+      alert("GAME OVER Swardigo!\nScore mo: " + score + "\nBest: " + best);
+      playing = false;
+      scoreText.innerText = "Score: " + score + " | HP: 0 | Best: " + best;
+      return;
+    }
+  }
+  scoreText.innerText = "Score: " + score + " | HP: " + hp + " | Best: " + best;
+  requestAnimationFrame(gameLoop);
+}
+</script>
+</body>
+</html>
